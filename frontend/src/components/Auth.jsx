@@ -43,7 +43,7 @@ export default function Auth({ onLogin }) {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </label>
                 <label className="row">
-                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Запомнить меня
+                    <div>запомнить меня</div><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
                 </label>
                 <div className="row space-between">
                     <button className="btn" type="submit" disabled={loading}>{loading ? '...' : (isRegister ? 'Зарегистрироваться' : 'Войти')}</button>
