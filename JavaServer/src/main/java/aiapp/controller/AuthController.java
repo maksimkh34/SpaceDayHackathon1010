@@ -14,11 +14,11 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/auth/register")
-    public AuthResponse register(@RequestBody AuthRequest request) {
-        System.out.println("Received request: " + request.getUsername());
-        return authService.register(request);
-    }
+        @PostMapping("/register")
+        public AuthResponse register(@RequestBody AuthRequest request) {
+            System.out.println("Received request: " + request.getUsername());
+            return authService.register(request);
+        }
 
 
     @PostMapping("/login")
