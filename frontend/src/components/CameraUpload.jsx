@@ -119,7 +119,7 @@ export default function CameraUpload({ onNewReport }) {
             <h3>Селфи / Загрузка</h3>
 
             <div className="controls">
-                <div className="row">
+                <div className="row" style={{gap: '10px', marginTop: '10px'}}>
                     {!cameraOn ? (
                         <button className="btn" onClick={startCamera}>Включить камеру</button>
                     ) : (
@@ -137,7 +137,7 @@ export default function CameraUpload({ onNewReport }) {
                     <div className="camera-box" style={{ position: 'relative' }}>
                         <video
                             ref={videoRef}
-                            style={{ width: '100%', height: '280px', objectFit: 'cover', borderRadius: 8, display: cameraOn ? 'block' : 'none' }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: cameraOn ? 'block' : 'none' }}
                             playsInline
                             muted
                         />

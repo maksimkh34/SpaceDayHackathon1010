@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Для разработки с proxy используем относительные пути
-export const API_BASE = import.meta.env.DEV ? '' : 'http://26.1.225.234:8080'
+export const API_BASE = 'http://localhost:4000'
 export const MOCK_BACKEND = import.meta.env.VITE_MOCK === 'true' || false
 
 // token helpers
