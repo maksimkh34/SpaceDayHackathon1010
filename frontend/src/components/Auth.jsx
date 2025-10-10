@@ -42,11 +42,11 @@ export default function Auth({ onLogin }) {
                     Пароль
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </label>
-                <label className="row">
-                    <div>запомнить меня</div><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                <label className="row" style={{display: 'flex', gap: '10px'}}>
+                    запомнить меня<input className="row" style={{width: '15px', marginTop: '6px' }} type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
                 </label>
                 <div className="row space-between">
-                    <button className="btn" type="submit" disabled={loading}>{loading ? '...' : (isRegister ? 'Зарегистрироваться' : 'Войти')}</button>
+                    <button className="btn" type="submit" disabled={loading}>{loading ? 'Один момент..' : (isRegister ? 'Зарегистрироваться' : 'Войти')}</button>
                     <button type="button" className="link" onClick={() => setIsRegister((s) => !s)}>{isRegister ? 'Есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}</button>
                 </div>
             </form>

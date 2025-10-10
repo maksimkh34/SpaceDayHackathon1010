@@ -16,7 +16,6 @@ public class AuthController {
 
         @PostMapping("/register")
         public AuthResponse register(@RequestBody AuthRequest request) {
-            System.out.println("Received request: " + request.getUsername());
             return authService.register(request);
         }
 

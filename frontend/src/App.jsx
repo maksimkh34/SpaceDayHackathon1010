@@ -91,7 +91,7 @@ export default function App() {
             <header className="top">
                 <div className="brand">HealthPix</div>
                 <div className="actions">
-                    <button className="btn small" onClick={checkAI}>AI status</button>
+                    <button className="btn " onClick={checkAI}>AI status</button>
                     <button className="btn outline" onClick={onLogout}>Выйти</button>
                 </div>
             </header>
