@@ -1,12 +1,12 @@
 import axios from 'axios'
 
 // Для разработки с proxy используем относительные пути
-export const API_BASE = process.env.NODE_ENV === 'production' 
-  ? ''  // Относительные пути в production
-  : 'http://localhost:8080'
+// Автоматическое определение базового URL
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:8080' : '/api');
 
-export const MOCK_BACKEND = import.meta.env.VITE_MOCK === 'true' || false
-
+// Уберите MOCK_BACKEND для продакшена
+export const MOCK_BACKEND = false;
 // token helpers
 export function saveToken(token, remember) {
     if (remember) localStorage.setItem('token', token)

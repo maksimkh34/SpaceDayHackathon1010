@@ -30,4 +30,14 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request) {
         return authService.login(request);
     }
+
+    @RequestMapping(value = "/register", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleRegisterOptions() {
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleLoginOptions() {
+        return ResponseEntity.ok().build();
+    }
 }
