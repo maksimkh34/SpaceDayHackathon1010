@@ -3,6 +3,7 @@ package aiapp.controller;
 import aiapp.dto.AuthRequest;
 import aiapp.dto.AuthResponse;
 import aiapp.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,10 +15,15 @@ public class AuthController {
         this.authService = authService;
     }
 
-        @PostMapping("/register")
-        public AuthResponse register(@RequestBody AuthRequest request) {
-            return authService.register(request);
-        }
+    @GetMapping("/actuator/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/register")
+    public AuthResponse register(@RequestBody AuthRequest request) {
+        return authService.register(request);
+    }
 
 
     @PostMapping("/login")

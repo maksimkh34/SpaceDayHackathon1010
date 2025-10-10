@@ -13,8 +13,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -25,10 +23,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/**").permitAll() // Разрешаем все auth и api endpoints
+                        .requestMatchers("/", "/error", "/auth/**", "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults());
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -37,11 +36,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Разрешаем конкретные origins вместо "*"
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://frontend:3000"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
@@ -58,9 +62,6 @@ public class SecurityConfig {
                 "Access-Control-Allow-Origin",
                 "Access-Control-Allow-Credentials"
         ));
-
-        // Если нужно разрешить credentials, укажите конкретные origins вместо "*"
-        // configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

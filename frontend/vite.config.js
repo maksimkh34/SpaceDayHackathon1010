@@ -6,15 +6,19 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://26.1.225.234:8080',
+        target: 'http://localhost:8080', // для разработки
         changeOrigin: true,
         secure: false,
       },
       '/auth': {
-        target: 'http://26.1.225.234:8080',
+        target: 'http://localhost:8080', // для разработки
         changeOrigin: true,
         secure: false,
       }
     }
+  },
+  // Для правильной работы в продакшене
+  build: {
+    outDir: 'dist'
   }
 })
