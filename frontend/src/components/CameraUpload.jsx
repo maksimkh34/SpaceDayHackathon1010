@@ -8,6 +8,7 @@ export default function CameraUpload({ onNewReport }) {
     const [cameraOn, setCameraOn] = useState(false)
     const [streamObj, setStreamObj] = useState(null)
     const [file, setFile] = useState(null)
+    const [previewURL, setPreviewURL] = useState(null)
     const [uploading, setUploading] = useState(false)
     const [progress, setProgress] = useState(0)
 
@@ -15,36 +16,36 @@ export default function CameraUpload({ onNewReport }) {
     useEffect(() => {
         return () => {
             stopCamera()
+            if (previewURL) URL.revokeObjectURL(previewURL)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    // Отзыв старого previewURL при изменении
+    useEffect(() => {
+        return () => {
+            if (previewURL) {
+                URL.revokeObjectURL(previewURL)
+            }
+        }
+    }, [previewURL])
+
     async function startCamera() {
         try {
-            // сначала попросим поток
             const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-
-            // сохраним объект потока в стейт (чтобы можно было остановить)
             setStreamObj(s)
-
-            // Включаем отображение видео (сам элемент уже в DOM, т.к. мы всегда рендерим <video>)
             setCameraOn(true)
-
-            // Привязываем поток к видео. Иногда videoRef.current может появиться мгновенно — но проверяем на всякий случай.
             if (videoRef.current) {
                 videoRef.current.srcObject = s
                 try {
-                    // попытаться запустить воспроизведение (некоторые браузеры требуют этого)
                     await videoRef.current.play()
                 } catch (playErr) {
-                    // если autoplay блокируется, всё равно оставляем видео элемент с потоком
                     console.warn('video.play() failed:', playErr)
                 }
             }
         } catch (err) {
             console.error('camera start error', err)
             alert('Не удалось включить камеру: ' + (err.message || err))
-            // гарантированно выключаем состояние
             setCameraOn(false)
             if (streamObj) stopCamera()
         }
@@ -80,13 +81,36 @@ export default function CameraUpload({ onNewReport }) {
         canvas.toBlob((blob) => {
             if (!blob) return
             const f = new File([blob], `selfie_${Date.now()}.jpg`, { type: 'image/jpeg' })
+            // revoke previous preview if есть
+            if (previewURL) {
+                try { URL.revokeObjectURL(previewURL) } catch (e) {}
+            }
+            const url = URL.createObjectURL(blob)
             setFile(f)
+            setPreviewURL(url)
+            // не останавливаем камеру — пользователь может сделать заново без повторного запроса прав
         }, 'image/jpeg', 0.9)
     }
 
     function onFile(e) {
         const f = e.target.files && e.target.files[0]
-        if (f) setFile(f)
+        if (!f) return
+        if (previewURL) {
+            try { URL.revokeObjectURL(previewURL) } catch (e) {}
+        }
+        const url = URL.createObjectURL(f)
+        setFile(f)
+        setPreviewURL(url)
+    }
+
+    function resetPhoto() {
+        // удалить текущую фотографию и вернуть камеру (если была включена)
+        if (previewURL) {
+            try { URL.revokeObjectURL(previewURL) } catch (e) {}
+        }
+        setPreviewURL(null)
+        setFile(null)
+        // если камера была выключена — можно оставить выключенной; пользователь сам включит
     }
 
     async function doUpload() {
@@ -102,10 +126,12 @@ export default function CameraUpload({ onNewReport }) {
                 id: Date.now().toString(36),
                 result: data.result,
                 timestamp: data.timestamp || new Date().toISOString(),
-                imageURL: URL.createObjectURL(file),
+                imageURL: previewURL || URL.createObjectURL(file),
                 imageName: file.name,
             }
             onNewReport(report)
+            // после успешной отправки можно очистить превью, если нужно:
+            // resetPhoto()
         } catch (err) {
             alert('Ошибка при загрузке: ' + (err?.response?.data?.message || err.message))
         } finally {
@@ -119,7 +145,7 @@ export default function CameraUpload({ onNewReport }) {
             <h3>Селфи / Загрузка</h3>
 
             <div className="controls">
-                <div className="row" style={{gap: '10px', marginTop: '10px'}}>
+                <div className="row" style={{ gap: '10px', marginTop: '10px' }}>
                     {!cameraOn ? (
                         <button className="btn" onClick={startCamera}>Включить камеру</button>
                     ) : (
@@ -133,34 +159,48 @@ export default function CameraUpload({ onNewReport }) {
                 </div>
 
                 <div className="preview">
-                    {/* video всегда в DOM, но скрыт если камера выключена */}
-                    <div className="camera-box" style={{ position: 'relative' }}>
-                        <video
-                            ref={videoRef}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: cameraOn ? 'block' : 'none' }}
-                            playsInline
-                            muted
-                        />
-                        {!cameraOn && <div className="hint">Камера не включена. Можно выбрать файл.</div>}
-                        {cameraOn && (
-                            <button className="btn small" onClick={capture} style={{ position: 'absolute', right: 12, bottom: 12 }}>
-                                Сделать фото
-                            </button>
+                    {/* camera-box: видео или превью занимают одно и то же место */}
+                    <div className="camera-box" style={{ position: 'relative'}}>
+                        {/* Показываем превью, если есть файл */}
+                        {previewURL ? (
+                            <>
+                                <img
+                                    src={previewURL}
+                                    alt="preview"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }}
+                                />
+                                <div style={{ position: 'absolute', right: 12, bottom: 12 }}>
+                                    {/* Кнопки при показе превью */}
+                                    <div className="row gap">
+                                        <button className="btn" onClick={doUpload} disabled={uploading}>
+                                            {uploading ? 'Загрузка...' : 'Загрузить'}
+                                        </button>
+                                        <button style={{backgroundColor: 'white'}} className="btn outline" onClick={resetPhoto}>Сделать заново</button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* Показываем видео только если камера включена и нет превью */}
+                                <video
+                                    ref={videoRef}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: cameraOn ? 'block' : 'none' }}
+                                    playsInline
+                                    muted
+                                />
+                                {!cameraOn && <div className="hint">Камера не включена. Можно выбрать файл.</div>}
+                                {cameraOn && (
+                                    <button className="btn small" onClick={capture} style={{ position: 'absolute', right: 12, bottom: 12 }}>
+                                        Сделать фото
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
 
-                    {file && (
-                        <div className="file-preview">
-                            <img src={URL.createObjectURL(file)} alt="preview" />
-                            <div className="row gap">
-                                <button className="btn" onClick={doUpload} disabled={uploading}>{uploading ? 'Загрузка...' : 'Загрузить'}</button>
-                                <button className="btn outline" onClick={() => setFile(null)}>Сбросить</button>
-                            </div>
-                        </div>
-                    )}
-
+                    {/* Дополнительный прогресс, показываем отдельно */}
                     {uploading && (
-                        <div className="progress">
+                        <div className="progress" style={{ marginTop: 8 }}>
                             <div className="bar" style={{ width: `${progress}%` }}></div>
                             <span>{progress}%</span>
                         </div>

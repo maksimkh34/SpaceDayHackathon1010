@@ -32,7 +32,7 @@ export default function App() {
 
     function onNewReport(r) {
         setReport(r)
-        setHistory((h) => [ { id: r.id, result: r.result, date: r.timestamp }, ...h ])
+        setHistory((h) => [{ id: r.id, result: r.result, date: r.timestamp }, ...h])
     }
 
     async function checkAI() {
@@ -69,6 +69,11 @@ export default function App() {
         }
     }, [])
 
+    // сброс на главную (закрыть отчет и вернуть селфи-загрузку)
+    function goHome() {
+        setReport(null)
+    }
+
     if (showSplash) {
         return (
             <div className="splash">
@@ -89,7 +94,8 @@ export default function App() {
     return (
         <div className="page">
             <header className="top">
-                <div className="brand">HealthPix</div>
+                {/* логотип теперь кликабелен */}
+                <div className="brand" style={{ cursor: 'pointer' }} onClick={goHome}>HealthPix</div>
                 <div className="actions">
                     <button className="btn " onClick={checkAI}>AI status</button>
                     <button className="btn outline" onClick={onLogout}>Выйти</button>
@@ -98,19 +104,21 @@ export default function App() {
 
             <main className="container">
                 <section className="left">
-                    <CameraUpload onNewReport={onNewReport} />
-
-                    {report && (
+                    {/* Рендерим либо селфи-загрузку, либо отчёт — они взаимозаменяемы */}
+                    {!report ? (
+                        <CameraUpload onNewReport={onNewReport} />
+                    ) : (
                         <div className="card report">
                             <h3>Отчет</h3>
                             <div className="report-meta">{new Date(report.timestamp).toLocaleString()}</div>
                             <div className="report-body">
-                                <img src={report.imageURL} alt="report" />
+                                <img src={report.imageURL} alt="report" style={{ maxWidth: '100%', borderRadius: 8 }} />
                                 <pre>{report.result}</pre>
                             </div>
-                            <div className="row gap">
+                            <div className="row gap" style={{ marginTop: 12 }}>
                                 <button className="btn" onClick={() => saveReportPdf(report)}>Сохранить как PDF</button>
                                 <button className="btn outline" onClick={() => shareReport(report)}>Создать ссылку</button>
+                                <button className="btn ghost" onClick={goHome}>Вернуться на главную</button>
                             </div>
                         </div>
                     )}
@@ -135,5 +143,3 @@ export default function App() {
         </div>
     )
 }
-
-
