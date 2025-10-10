@@ -22,31 +22,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF - modern lambda style
                 .csrf(AbstractHttpConfigurer::disable)
-                // Enable CORS with your configuration
-                .cors(cors -> cors.configurationSource(yourCorsConfigurationSource())) // ✅ Важно: включите CORS
-                // Configure authorization
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Allow access to auth endpoints
+                        .requestMatchers("/auth/**", "/api/**").permitAll() // Разрешаем все auth и api endpoints
                         .anyRequest().authenticated()
                 )
-                // Optional: Enable basic auth if needed
                 .httpBasic(withDefaults());
 
         return http.build();
     }
 
-    // CORS configuration source
     @Bean
-    public CorsConfigurationSource yourCorsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Для разработки можно разрешить все источники, но для продакшена укажите конкретный
-        configuration.setAllowedOrigins(List.of("*")); // ✅ Или "http://localhost:3000" для вашего фронтенда
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        // Если вы не передаете куки или авторизационные заголовки, allowCredentials не нужен
-        // configuration.setAllowCredentials(true); // Если используется, то allowedOrigins не может быть "*"
+
+        // Разрешаем конкретные origins вместо "*"
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://localhost:3000"
+        ));
+
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
+
+        // Если нужно разрешить credentials, укажите конкретные origins вместо "*"
+        // configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
