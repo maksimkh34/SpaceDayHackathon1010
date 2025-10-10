@@ -1,3 +1,4 @@
+// FILE: src/components/CameraUpload.jsx
 import React, { useEffect, useRef, useState } from 'react'
 import { uploadImage } from '../api'
 
@@ -5,30 +6,67 @@ export default function CameraUpload({ onNewReport }) {
     const videoRef = useRef(null)
     const canvasRef = useRef(null)
     const [cameraOn, setCameraOn] = useState(false)
+    const [streamObj, setStreamObj] = useState(null)
     const [file, setFile] = useState(null)
     const [uploading, setUploading] = useState(false)
     const [progress, setProgress] = useState(0)
 
+    // Очистка при размонтировании
     useEffect(() => {
-        return () => stopCamera()
+        return () => {
+            stopCamera()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     async function startCamera() {
         try {
+            // сначала попросим поток
             const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-            videoRef.current.srcObject = s
-            await videoRef.current.play()
+
+            // сохраним объект потока в стейт (чтобы можно было остановить)
+            setStreamObj(s)
+
+            // Включаем отображение видео (сам элемент уже в DOM, т.к. мы всегда рендерим <video>)
             setCameraOn(true)
+
+            // Привязываем поток к видео. Иногда videoRef.current может появиться мгновенно — но проверяем на всякий случай.
+            if (videoRef.current) {
+                videoRef.current.srcObject = s
+                try {
+                    // попытаться запустить воспроизведение (некоторые браузеры требуют этого)
+                    await videoRef.current.play()
+                } catch (playErr) {
+                    // если autoplay блокируется, всё равно оставляем видео элемент с потоком
+                    console.warn('video.play() failed:', playErr)
+                }
+            }
         } catch (err) {
-            alert('Не удалось включить камеру: ' + err.message)
+            console.error('camera start error', err)
+            alert('Не удалось включить камеру: ' + (err.message || err))
+            // гарантированно выключаем состояние
+            setCameraOn(false)
+            if (streamObj) stopCamera()
         }
     }
 
     function stopCamera() {
-        const s = videoRef.current?.srcObject
-        if (s) s.getTracks().forEach((t) => t.stop())
-        if (videoRef.current) videoRef.current.srcObject = null
-        setCameraOn(false)
+        try {
+            if (streamObj) {
+                streamObj.getTracks().forEach((t) => t.stop())
+            } else {
+                const s = videoRef.current?.srcObject
+                if (s && s.getTracks) s.getTracks().forEach((t) => t.stop())
+            }
+        } catch (e) {
+            console.warn('stopCamera error', e)
+        } finally {
+            if (videoRef.current) {
+                try { videoRef.current.srcObject = null } catch (e) {}
+            }
+            setStreamObj(null)
+            setCameraOn(false)
+        }
     }
 
     function capture() {
@@ -95,14 +133,21 @@ export default function CameraUpload({ onNewReport }) {
                 </div>
 
                 <div className="preview">
-                    {cameraOn ? (
-                        <div className="camera-box">
-                            <video ref={videoRef} playsInline muted />
-                            <button className="btn small" onClick={capture}>Сделать фото</button>
-                        </div>
-                    ) : (
-                        <div className="hint">Камера не включена. Можно выбрать файл.</div>
-                    )}
+                    {/* video всегда в DOM, но скрыт если камера выключена */}
+                    <div className="camera-box" style={{ position: 'relative' }}>
+                        <video
+                            ref={videoRef}
+                            style={{ width: '100%', height: '280px', objectFit: 'cover', borderRadius: 8, display: cameraOn ? 'block' : 'none' }}
+                            playsInline
+                            muted
+                        />
+                        {!cameraOn && <div className="hint">Камера не включена. Можно выбрать файл.</div>}
+                        {cameraOn && (
+                            <button className="btn small" onClick={capture} style={{ position: 'absolute', right: 12, bottom: 12 }}>
+                                Сделать фото
+                            </button>
+                        )}
+                    </div>
 
                     {file && (
                         <div className="file-preview">
