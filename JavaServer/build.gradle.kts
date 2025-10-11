@@ -6,7 +6,7 @@ plugins {
 
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -16,10 +16,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.h2database:h2") // пока что in-memory база
-    implementation("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-
+    implementation("org.springframework:spring-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    runtimeOnly("org.postgresql:postgresql:42.7.7")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
