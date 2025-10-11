@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+opencv-python
+mediapipe
+numpy
+scipy
+scikit-image
+matplotlib
+flask
+pillow
+requests

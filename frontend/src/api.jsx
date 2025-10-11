@@ -1,9 +1,12 @@
 import axios from 'axios'
 
 // Для разработки с proxy используем относительные пути
-export const API_BASE = 'http://localhost:4000'
-export const MOCK_BACKEND = import.meta.env.VITE_MOCK === 'true' || false
+// Автоматическое определение базового URL
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:8080' : '/api');
 
+// Уберите MOCK_BACKEND для продакшена
+export const MOCK_BACKEND = false;
 // token helpers
 export function saveToken(token, remember) {
     if (remember) localStorage.setItem('token', token)
@@ -17,14 +20,26 @@ export function clearToken() {
     sessionStorage.removeItem('token')
 }
 
-const axiosInstance = axios.create({ baseURL: API_BASE })
+const axiosInstance = axios.create({ 
+  baseURL: API_BASE,
+  timeout: 10000
+})
+
 axiosInstance.interceptors.request.use((cfg) => {
     const token = readToken()
     if (token) cfg.headers.Authorization = `Bearer ${token}`
     return cfg
 })
 
-// API functions
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', error.response?.data || error.message)
+    return Promise.reject(error)
+  }
+)
+
+// API functions - УБЕДИТЕСЬ ЧТО ЭТИ ФУНКЦИИ ЭКСПОРТИРУЮТСЯ
 export async function registerUser(username, password) {
     if (MOCK_BACKEND) return { data: { message: 'User created' } }
     return axiosInstance.post('/auth/register', { username, password })
