@@ -1,4 +1,3 @@
-// FILE: src/components/CameraUpload.jsx
 import React, { useEffect, useRef, useState } from 'react'
 import { uploadImage } from '../api'
 
@@ -32,20 +31,24 @@ export default function CameraUpload({ onNewReport }) {
         }
     }, [previewURL])
 
+    // NEW: Этот хук отвечает за подключение потока к видеоэлементу
+    // Он сработает после рендера, когда videoRef.current будет гарантированно доступен
+    useEffect(() => {
+        if (cameraOn && streamObj && videoRef.current) {
+            videoRef.current.srcObject = streamObj
+            videoRef.current.play().catch(err => {
+                console.warn('Video play was prevented:', err)
+            })
+        }
+    }, [cameraOn, streamObj])
+
+
+    // MODIFIED: Функция теперь только получает стрим и обновляет состояние
     async function startCamera() {
         try {
             const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
             setStreamObj(s)
-            setCameraOn(true)
-            if (videoRef.current) {
-                videoRef.current.srcObject = s
-                try {
-                    await videoRef.current.play()
-                } catch (playErr) {
-                    // autoplay может быть заблокирован — оставляем поток, пользователь увидит превью при разрешении
-                    console.warn('video.play() failed:', playErr)
-                }
-            }
+            setCameraOn(true) // Это изменение вызовет срабатывание useEffect выше
         } catch (err) {
             console.error('camera start error', err)
             alert('Не удалось включить камеру: ' + (err.message || err))
@@ -65,24 +68,14 @@ export default function CameraUpload({ onNewReport }) {
         } catch (e) {
             console.warn('stopCamera error', e)
         } finally {
-            // отвязываем видео
             if (videoRef.current) {
                 try { videoRef.current.srcObject = null } catch (e) {}
             }
-
-            // освобождаем preview URL и сбрасываем файл/превью,
-            // чтобы превью исчезло из UI после нажатия "Отключить камеру"
-            try {
-                if (previewURL) {
-                    URL.revokeObjectURL(previewURL)
-                }
-            } catch (e) {
-                console.warn('revokeObjectURL failed', e)
+            if (previewURL) {
+                try { URL.revokeObjectURL(previewURL) } catch (e) {}
             }
-
             setPreviewURL(null)
             setFile(null)
-
             setStreamObj(null)
             setCameraOn(false)
         }
@@ -94,27 +87,18 @@ export default function CameraUpload({ onNewReport }) {
         const canvas = canvasRef.current
         if (!v || !canvas) return
 
-        // Определяем размеры видео
         const videoWidth = v.videoWidth
         const videoHeight = v.videoHeight
-
-        // Находим меньшую сторону, чтобы определить размер квадрата для вырезки
         const side = Math.min(videoWidth, videoHeight)
 
-        // Устанавливаем размер canvas (например, 1080x1080 для хорошего качества)
         canvas.width = 1080
         canvas.height = 1080
 
-        // Вычисляем координаты (sx, sy) для верхнего левого угла квадрата
-        // в исходном видео, чтобы вырезать из центра.
         const sx = (videoWidth - side) / 2
         const sy = (videoHeight - side) / 2
 
         const ctx = canvas.getContext('2d')
-
-        // Очищаем canvas и рисуем на нём только центральную квадратную часть видео
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
         ctx.drawImage(v, sx, sy, side, side, 0, 0, canvas.width, canvas.height)
 
         canvas.toBlob((blob) => {
@@ -127,7 +111,7 @@ export default function CameraUpload({ onNewReport }) {
             const url = URL.createObjectURL(blob)
             setFile(f)
             setPreviewURL(url)
-        }, 'image/jpeg', 0.95) // Увеличил качество до 0.95 для селфи
+        }, 'image/jpeg', 0.95)
     }
 
     function onFile(e) {
@@ -158,7 +142,6 @@ export default function CameraUpload({ onNewReport }) {
                 imageName: file.name,
             }
             onNewReport(report)
-            // не удаляем previewURL автоматически — пользователь может сохранить/посмотреть
         } catch (err) {
             alert('Ошибка при загрузке: ' + (err?.response?.data?.message || err.message))
         } finally {
@@ -167,25 +150,21 @@ export default function CameraUpload({ onNewReport }) {
         }
     }
 
-    // Reset: убрать превью и вернуть камеру (если она выключена — запустить)
     function resetPhoto() {
         if (previewURL) {
             try { URL.revokeObjectURL(previewURL) } catch (e) {}
         }
         setPreviewURL(null)
         setFile(null)
-        // Если камера была выключена — включаем её автоматически (т.к. пользователь явно хочет сделать фото)
         if (!cameraOn) {
             startCamera()
         } else {
-            // Если камера уже включена — попробуем запустить видео (вдруг autoplay остановился)
             try {
                 videoRef.current?.play().catch(() => {})
             } catch (e) {}
         }
     }
 
-    // стили для плавной анимации между видео и изображением.
     const mediaCommonStyle = {
         position: 'absolute',
         top: 0,
@@ -200,7 +179,6 @@ export default function CameraUpload({ onNewReport }) {
     return (
         <div className="card">
             <h3>Селфи / Загрузка</h3>
-
             <div className="controls">
                 <div className="row" style={{ gap: '20px', marginTop: '10px' }}>
                     {!cameraOn ? (
@@ -208,7 +186,6 @@ export default function CameraUpload({ onNewReport }) {
                     ) : (
                         <button className="btn" onClick={stopCamera}>Отключить камеру</button>
                     )}
-
                     <label className="btn file-btn">
                         Выбрать фото
                         <input
@@ -220,9 +197,7 @@ export default function CameraUpload({ onNewReport }) {
                         />
                     </label>
                 </div>
-
-                <div className="preview" style={{ marginTop: 12 }}>
-                    {/* camera-box: видео и превью занимают одно и то же место и плавно перетекают */}
+                <div className={`preview ${!cameraOn && !previewURL ? 'camera-idle' : ''}`} style={{ marginTop: 12 }}>
                     <div className="camera-box" style={{
                         position: 'relative',
                         width: '100%',
@@ -230,7 +205,6 @@ export default function CameraUpload({ onNewReport }) {
                         overflow: 'hidden',
                         backgroundColor: '#eee'
                     }}>
-                        {/* IMG превью (показывается поверх видео при наличии previewURL) */}
                         <img
                             src={previewURL || ''}
                             alt="preview"
@@ -243,8 +217,6 @@ export default function CameraUpload({ onNewReport }) {
                                 backgroundColor: '#eee',
                             }}
                         />
-
-                        {/* Video — под img, но всё ещё играет, если включена камера */}
                         <video
                             ref={videoRef}
                             playsInline
@@ -258,8 +230,6 @@ export default function CameraUpload({ onNewReport }) {
                                 display: 'block',
                             }}
                         />
-
-                        {/* Подсказка если камера выключена и нет превью */}
                         {!previewURL && !cameraOn && (
                             <div className="hint" style={{
                                 position: 'absolute',
@@ -272,8 +242,6 @@ export default function CameraUpload({ onNewReport }) {
                                 Камера не включена. Можно выбрать файл.
                             </div>
                         )}
-
-                        {/* Кнопки — положение одинаковое, но контент зависит от состояния */}
                         <div style={{position: 'absolute', right: 12, bottom: 12, zIndex: 5}}>
                             {!previewURL ? (
                                 cameraOn ? (
@@ -294,8 +262,6 @@ export default function CameraUpload({ onNewReport }) {
                             )}
                         </div>
                     </div>
-
-                    {/* Дополнительный прогресс, показываем отдельно */}
                     {uploading && (
                         <div className="progress" style={{ marginTop: 8 }}>
                             <div className="bar" style={{ width: `${progress}%` }}></div>
@@ -303,7 +269,6 @@ export default function CameraUpload({ onNewReport }) {
                         </div>
                     )}
                 </div>
-
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
             </div>
         </div>
