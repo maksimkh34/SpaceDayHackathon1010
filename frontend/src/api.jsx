@@ -2,8 +2,7 @@ import axios from 'axios'
 
 // Для разработки с proxy используем относительные пути
 // Автоматическое определение базового URL
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:8080' : '/api');
+export const API_BASE = 'http://26.1.225.234:8080';
 
 // Уберите MOCK_BACKEND для продакшена
 export const MOCK_BACKEND = false;
