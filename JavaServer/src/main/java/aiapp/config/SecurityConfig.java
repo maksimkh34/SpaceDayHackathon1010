@@ -24,7 +24,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/error", "/auth/**", "/api/**").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/error",
+                                "/auth/**",
+                                "/api/**",
+                                "/actuator/health",
+                                "/actuator/info"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
