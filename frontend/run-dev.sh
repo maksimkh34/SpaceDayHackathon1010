@@ -15,4 +15,4 @@ if ! command -v npx &> /dev/null; then
 fi
 
 echo "✅ Dependencies ready. Starting dev server..."
-npm run dev
+npm run dev -- --host 0.0.0.0

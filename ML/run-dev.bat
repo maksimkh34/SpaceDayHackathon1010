@@ -2,6 +2,9 @@
 echo 🚀 Starting ML Service in development mode...
 echo.
 
+REM Переходим в папку скрипта (на случай если запускаем из другой директории)
+cd /d "%~dp0"
+
 REM Проверяем наличие Python 3.10
 echo 🔍 Checking for Python 3.10...
 
@@ -86,11 +89,24 @@ python -c "import flask; print('✅ Flask:', flask.__version__)" 2>nul || echo �
 python -c "import cv2; print('✅ OpenCV:', cv2.__version__)" 2>nul || echo ❌ OpenCV not installed
 python -c "import numpy; print('✅ NumPy:', numpy.__version__)" 2>nul || echo ❌ NumPy not installed
 
+REM Проверяем наличие app.py в текущей директории
+if not exist "app.py" (
+    echo.
+    echo ❌ ERROR: app.py not found in current directory!
+    echo 📍 Current directory: %CD%
+    echo 💡 Make sure you're running the script from the ML folder
+    echo.
+    pause
+    exit /b 1
+)
+
 echo.
 echo 🤖 Starting ML service on http://localhost:5000
+echo 📍 Running from: %CD%
 echo 💡 Press Ctrl+C to stop the service
 echo.
 
+REM Запускаем приложение из текущей директории
 python app.py
 
 pause
