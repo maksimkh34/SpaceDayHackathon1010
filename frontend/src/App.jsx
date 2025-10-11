@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import Auth from './components/Auth'
 import CameraUpload from './components/CameraUpload'
 import { readToken, clearToken, getAiStatus, getHistory } from './api'
-import PdfDownloader from './components/PdfDownloader'
 
 
 
@@ -224,7 +223,7 @@ export default function App() {
                                 <pre>{report.result}</pre>
                             </div>
                             <div className="row gap" style={{ marginTop: 12 }}>
-                                <PdfDownloader report={report} filename={`report_${report.id}.pdf`} />
+                                <button className="btn" >Скачать отчёт</button>
                                 <button className="btn outline" onClick={() => shareReport(report)}>Создать ссылку</button>
                                 <button className="btn ghost" onClick={goHome}>Вернуться на главную</button>
                             </div>
