@@ -1,11 +1,11 @@
+// App.jsx
 import React, { useEffect, useState } from 'react'
 import Auth from './components/Auth'
 import CameraUpload from './components/CameraUpload'
+import ReportView from './components/ReportView' // Импортируем новый компонент
 import { readToken, clearToken, getAiStatus, getHistory } from './api'
 
-
 export default function App() {
-    // MODIFIED: Default theme is now 'dark'
     const [theme, setTheme] = useState('dark')
     const [token, setToken] = useState(readToken())
     const [report, setReport] = useState(null)
@@ -13,26 +13,23 @@ export default function App() {
     const [showSplash, setShowSplash] = useState(true)
     const [fadeOut, setFadeOut] = useState(false)
 
-    // NEW: Effect to apply the theme class to the body
     useEffect(() => {
         document.body.classList.remove('light', 'dark')
         document.body.classList.add(theme)
     }, [theme])
 
-    // NEW: Function to toggle the theme
     function toggleTheme() {
         setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'))
     }
 
-    // MODIFIED: Splash screen logic with fade-out animation
     useEffect(() => {
         const t1 = setTimeout(() => {
-            setFadeOut(true) // Start fade-out animation
+            setFadeOut(true)
         }, 2000)
 
         const t2 = setTimeout(() => {
-            setShowSplash(false) // Remove from DOM after animation
-        }, 2500) // 2000 + 500ms for animation duration
+            setShowSplash(false)
+        }, 2500)
 
         return () => {
             clearTimeout(t1)
@@ -69,8 +66,6 @@ export default function App() {
             alert('Ошибка проверки AI')
         }
     }
-
-
 
     function shareReport(r) {
         const id = Date.now().toString(36)
@@ -114,7 +109,6 @@ export default function App() {
             <header className="top">
                 <div className="brand" style={{ cursor: 'pointer' }} onClick={goHome}>HealthPix</div>
                 <div className="actions">
-                    {/* NEW: Theme toggle button */}
                     <button
                         className="btn ghost"
                         onClick={toggleTheme}
@@ -123,7 +117,7 @@ export default function App() {
                     >
                         {theme === 'light' ? '🌙' : '☀️'}
                     </button>
-                    <button className="btn " onClick={checkAI}>AI status</button>
+                    <button className="btn" onClick={checkAI}>AI status</button>
                     <button className="btn outline" onClick={onLogout}>Выйти</button>
                 </div>
             </header>
@@ -134,14 +128,18 @@ export default function App() {
                         <CameraUpload onNewReport={onNewReport} />
                     ) : (
                         <div className="card report">
-                            <h3>Отчет</h3>
+                            <h3>Отчет анализа кожи</h3>
                             <div className="report-meta">{new Date(report.timestamp).toLocaleString()}</div>
+
                             <div className="report-body">
-                                <img src={report.imageURL} alt="report" style={{ maxWidth: '100%', borderRadius: 8 }} />
-                                <pre>{report.result}</pre>
+                                <img src={report.imageURL} alt="Анализируемое фото" className="report-image" />
+
+                                {/* Используем новый компонент */}
+                                <ReportView report={report} />
                             </div>
+
                             <div className="row gap" style={{ marginTop: 12 }}>
-                                <button className="btn" >Скачать отчёт</button>
+                                <button className="btn">Скачать отчёт</button>
                                 <button className="btn outline" onClick={() => shareReport(report)}>Создать ссылку</button>
                                 <button className="btn ghost" onClick={goHome}>Вернуться на главную</button>
                             </div>
@@ -151,12 +149,21 @@ export default function App() {
 
                 <aside className="right">
                     <div className="card">
-                        <h4>История</h4>
+                        <h4>История анализов</h4>
                         {history.length === 0 ? <div className="hint">История пуста</div> : (
                             <ul className="history-list">
                                 {history.map((h) => (
                                     <li key={h.id}>
-                                        <div className="hist-result">{h.result}</div>
+                                        <div className="hist-result">
+                                            {(() => {
+                                                try {
+                                                    const data = JSON.parse(h.result)
+                                                    return `Состояние: ${Math.round(data.overall_score * 100)}щ`
+                                                } catch {
+                                                    return h.result.substring(0, 50) + '...'
+                                                }
+                                            })()}
+                                        </div>
                                         <div className="hist-date">{new Date(h.date).toLocaleString()}</div>
                                     </li>
                                 ))}
