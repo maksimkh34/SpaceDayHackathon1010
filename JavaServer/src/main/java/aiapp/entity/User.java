@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "profiles")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,8 +15,16 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username;
+    private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "password_hash", nullable = false)
+    private String passHash;
+
+    @Column(name = "is_confirmed", nullable = false)
+    private boolean isConfirmed = false;
+
+    @Column(name = "request_history", columnDefinition = "jsonb")
+    private String requestHistory = "[]";
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
