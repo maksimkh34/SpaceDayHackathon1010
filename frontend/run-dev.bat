@@ -9,5 +9,5 @@ if not exist "node_modules" (
 )
 
 echo ✅ Starting dev server...
-npm run dev
+npm run dev -- --host 0.0.0.0
 pause
