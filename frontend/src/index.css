@@ -1,9 +1,4 @@
-* {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-}
-
+/* Light Theme (was the default) */
 :root {
     --bg: #f8fafc;
     --card: #ffffff;
@@ -12,6 +7,23 @@
     --muted: #64748b;
     --text: #1e293b;
     --border: #e2e8f0;
+}
+
+/* NEW: Dark Theme Variables 🎨 */
+body.dark {
+    --bg: #111827; /* Dark Slate Blue */
+    --card: #1f2937; /* Lighter Slate Blue */
+    --accent: #6366f1; /* Indigo */
+    --accent-light: #818cf8; /* Lighter Indigo */
+    --muted: #9ca3af; /* Muted Gray */
+    --text: #e5e7eb; /* Light Gray Text */
+    --border: #374151; /* Darker Border */
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 
 * {
@@ -24,9 +36,10 @@ body {
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease; /* Smooth transition */
 }
 
-/* Splash - улучшенный */
+/* Splash - looks good on dark theme already */
 .splash {
     min-height: 100vh;
     display: flex;
@@ -35,6 +48,18 @@ body {
     justify-content: center;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.splash.fade-out {
+    opacity: 0;
 }
 
 .logo {
@@ -67,7 +92,7 @@ body {
     opacity: 0;
     color: rgba(255, 255, 255, 0.8);
     animation: fadeIn 1100ms 200ms ease forwards;
-    font-weight: 300;
+    font-weight: 600;
     letter-spacing: 1px;
 }
 
@@ -77,7 +102,6 @@ body {
     }
 }
 
-/* Основная сетка - исправленная */
 .page {
     min-height: 100vh;
     padding: 24px;
@@ -108,33 +132,78 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Стили для полосы прокрутки */
+.right::-webkit-scrollbar {
+    width: 8px;
+}
+
+.right::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 4px;
+}
+
+.right::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 4px;
+    border: 2px solid var(--bg);
+}
+
+.right::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* Для Firefox */
+.right {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) var(--bg);
+}
+
+/* Общие стили для всех полос прокрутки в приложении */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* Для Firefox */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) var(--bg);
+}
+
 .brand:hover {
     transform: scale(1.05);
 }
 
 .container {
     display: grid;
-    grid-template-columns: 1fr 320px; /* Основной контент слева, история справа */
+    grid-template-columns: 1fr 320px;
     gap: 24px;
     align-items: start;
 }
 
-/* Левая колонка - основной контент */
-.left {
-    /* Левая колонка занимает всё доступное пространство */
-}
+.left {}
 
-/* Правая колонка - история */
 .right {
     position: sticky;
     top: 24px;
     height: fit-content;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
+    padding-right: 4px; /* Добавляем отступ для полосы прокрутки */
 }
 
-/* Кнопки с градиентом и анимацией */
-/* Кнопки с градиентом и анимацией - ОБНОВЛЕННЫЕ СТИЛИ */
 .btn {
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: #fff;
@@ -171,7 +240,7 @@ body {
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .btn:active {
@@ -182,9 +251,7 @@ body {
     background: transparent;
     color: var(--accent);
     border: 2px solid var(--accent);
-    transition: all 0.3s ease;
-    padding: 12px 24px; /* Одинаковый padding с обычной кнопкой */
-    min-height: 48px; /* Одинаковая минимальная высота */
+    min-height: 48px;
 }
 
 .btn.outline:hover {
@@ -197,8 +264,7 @@ body {
     background: transparent;
     color: var(--muted);
     border: 2px solid var(--border);
-    padding: 12px 24px; /* Одинаковый padding */
-    min-height: 48px; /* Одинаковая минимальная высота */
+    min-height: 48px;
 }
 
 .btn.ghost:hover {
@@ -213,7 +279,6 @@ body {
     min-height: 40px;
 }
 
-/* Карточки с анимацией */
 .card {
     background: var(--card);
     padding: 20px;
@@ -228,7 +293,6 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-/* Формы */
 .auth-card {
     width: 420px;
     border-radius: 20px;
@@ -252,15 +316,15 @@ input {
     background: var(--bg);
     transition: all 0.3s ease;
     font-size: 16px;
+    color: var(--text); /* NEW: Ensure input text color changes with theme */
 }
 
 .form input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-/* Progress bar */
 .progress .bar {
     height: 8px;
     background: linear-gradient(90deg, var(--accent), var(--accent-light));
@@ -269,7 +333,6 @@ input {
     transition: width 0.3s ease;
 }
 
-/* History list */
 .history-list {
     list-style: none;
     padding: 0;
@@ -277,11 +340,10 @@ input {
 }
 
 .history-list li {
-    padding: 12px 0;
+    padding: 12px 8px;
     border-bottom: 1px solid var(--border);
     transition: all 0.3s ease;
     border-radius: 8px;
-    padding-left: 8px;
     margin-bottom: 4px;
 }
 
@@ -301,9 +363,8 @@ input {
     color: var(--muted);
 }
 
-/* Report styling */
 .report {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: linear-gradient(135deg, var(--card) 0%, var(--bg) 100%);
 }
 
 .report-body {
@@ -338,14 +399,13 @@ input {
     flex: 1;
 }
 
-/* Camera preview improvements */
 .camera-box {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--border); /* MODIFIED: Use variable for background */
 }
 
-/* Link button in auth */
 .link {
     background: transparent;
     border: none;
@@ -365,40 +425,30 @@ input {
     gap: 18px;
 }
 
-/* Responsive - исправленный */
 @media (max-width: 900px) {
     .container {
-        grid-template-columns: 1fr; /* Одна колонка на мобильных */
+        grid-template-columns: 1fr;
         gap: 16px;
     }
-
-    .right {
-        position: static; /* Убираем sticky на мобильных */
-        max-height: none;
-        order: 2; /* История под основным контентом */
+    .right { position: static; max-height: none; order: 2; }
+    .left { order: 1; }
+    .report-body { flex-direction: column; align-items: center; }
+    .auth-card { width: 380px; margin: 0 16px; }
+    .brand { font-size: 20px; }
+    .page { padding: 16px; }
+    .btn {
+        font-size: 12px;
     }
+}
 
-    .left {
-        order: 1; /* Основной контент сверху */
+@media (min-width: 901px) {
+    .camera-idle .camera-box {
+        display: none;
     }
-
-    .report-body {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .auth-card {
-        width: 380px;
-        margin: 0 16px;
-    }
-
-    .brand {
-        font-size: 20px;
-    }
-
-    .page {
-        padding: 16px;
-    }
+}
+@media (max-width: 426px) {
+    .brand { display: none; }
+    .actions { justify-content: flex-end; width: 100%; }
 }
 
 .actions {
@@ -406,14 +456,12 @@ input {
     gap: 12px;
 }
 
-/* Checkbox styling */
 input[type="checkbox"] {
     width: 18px !important;
     height: 18px;
     accent-color: var(--accent);
 }
 
-/* File button improvement */
 .file-btn {
     position: relative;
     overflow: hidden;
@@ -425,7 +473,6 @@ input[type="checkbox"] {
     transform: translateY(-2px);
 }
 
-/* Hint text */
 .hint {
     color: var(--muted);
     padding: 12px;
@@ -433,33 +480,13 @@ input[type="checkbox"] {
     font-style: italic;
 }
 
-/* Row helpers */
-.row {
-    display: flex;
-    align-items: center;
-}
+.row { display: flex; align-items: center; }
+.row.space-between { justify-content: space-between; }
+.row.gap { gap: 10px; }
+.error-message { color: #ef4444; font-size: 12px; margin-top: 4px; }
+.form input:invalid { border-color: #ef4444; }
+.form input::placeholder { color: #9ca3af; font-size: 14px; }
 
-.row.space-between {
-    justify-content: space-between;
+html {
+    scrollbar-color: #9ca3af #1e293b; /* thumb track */
 }
-
-.row.gap {
-    gap: 10px;
-}
-/* Добавьте в CSS */
-.error-message {
-    color: #ef4444;
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-.form input:invalid {
-    border-color: #ef4444;
-}
-
-/* Улучшим внешний вид placeholder */
-.form input::placeholder {
-    color: #9ca3af;
-    font-size: 14px;
-}
-

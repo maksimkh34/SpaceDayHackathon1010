@@ -9,8 +9,8 @@ class SkinHealthReport:
     def generate_report(metrics: Dict[str, float]) -> Dict[str, any]:
         report = {
             'overall_score': SkinHealthReport._calculate_overall_score(metrics),
-            'concerns': SkinHealthReport._identify_concerns(metrics),
             'recommendations': SkinHealthReport._generate_recommendations(metrics),
+            'features': SkinHealthReport._get_features(metrics),
             'metrics_summary': metrics
         }
         return report
@@ -44,28 +44,83 @@ class SkinHealthReport:
         return total_score / total_weight if total_weight > 0 else 0.0
     
     @staticmethod
-    def _identify_concerns(metrics: Dict[str, float]) -> List[str]:
-        concerns = []
-        thresholds = {
-            'acne_spots': 0.4,
-            'severe_acne': 0.3,
-            'moderate_acne': 0.4,
-            'oiliness': 0.5,
-            'pigmentation': 0.5,
-            'dark_circles': 0.5,
-            'wrinkles': 0.5,
-            'puffiness': 0.5,
-            'redness': 0.5,
-            'cyanosis': 0.3,
-            'jaundice': 0.3
-        }
+    def _get_features(metrics: Dict[str, float]) -> List[str]:
+        dark_circles = metrics.get('dark_circles', 0.0)
+        puffiness = metrics.get('puffiness', 0.0)
+        wrinkles = metrics.get('wrinkles', 0.0)
+        redness = metrics.get('redness', 0.0)
+        oiliness = metrics.get('oiliness', 0.0)
+        paleness = metrics.get('paleness', 0.0)
+        cyanosis = metrics.get('cyanosis', 0.0)
+        jaundice = metrics.get('jaundice', 0.0)
+        mild_acne = metrics.get('mild_acne', 0.0)
+        moderate_acne = metrics.get('moderate_acne', 0.0)
+        severe_acne = metrics.get('severe_acne', 0.0)
+        texture_roughness = metrics.get('texture_roughness', 0.0)
+        pigmentation = metrics.get('pigmentation', 0.0)
+        pore_size = metrics.get('pore_size', 0.0)
+        vascularity = metrics.get('vascularity', 0.0)
+            # === КОМПЛЕКСНЫЕ ХАРАКТЕРИСТИКИ ===
+        fatigue = (dark_circles + puffiness + wrinkles) / 3.0
+        stress = (wrinkles + redness + oiliness) / 3.0
+        skin_health = 1 - (0.5*(mild_acne + moderate_acne + severe_acne) + 0.3*redness + 0.2*texture_roughness)
+        color_balance = 1 - (0.5*paleness + 0.5*cyanosis)
+        eye_condition = 1 - (0.5*dark_circles + 0.5*jaundice + 0.3*redness)
+        aging_signs = (0.4*wrinkles + 0.3*pore_size + 0.3*pigmentation)
+        puffiness_level = puffiness
+        oil_balance = oiliness
+
+        # === РЕЗУЛЬТАТЫ ===
+        good_keys = []
+        bad_keys = []
+
+        # Эмоциональное состояние
+        good_keys.append("fatigue_low" if fatigue < 0.4 else "fatigue_high")
+        good_keys.append("stress_low" if stress < 0.4 else "stress_high")
+
+        # Кожа
+        if skin_health > 0.7:
+            good_keys.append("skin_good")
+        elif skin_health < 0.4:
+            bad_keys.append("skin_poor")
+        else:
+            bad_keys.append("skin_moderate")
+
+        # Цвет лица
+        if color_balance > 0.7:
+            good_keys.append("color_good")
+        elif color_balance < 0.4:
+            bad_keys.append("color_bad")
+
+        # Область глаз
+        if eye_condition > 0.7:
+            good_keys.append("eyes_good")
+        elif eye_condition < 0.4:
+            bad_keys.append("eyes_bad")
+
+        # Старение
+        if aging_signs < 0.4:
+            good_keys.append("aging_low")
+        elif aging_signs > 0.7:
+            bad_keys.append("aging_high")
+
+        # Отёки
+        if puffiness_level > 0.6:
+            bad_keys.append("puffiness_high")
+        elif puffiness_level < 0.3:
+            good_keys.append("puffiness_low")
+
+        # Баланс жирности
+        if oil_balance > 0.6:
+            bad_keys.append("oiliness_high")
+        elif oil_balance < 0.3 and texture_roughness > 0.5:
+            bad_keys.append("dryness_high")
+        else:
+            good_keys.append("hydration_ok")
+
+
+        return good_keys, bad_keys      
         
-        for key, threshold in thresholds.items():
-            if key in metrics and metrics[key] > threshold:
-                concerns.append(key.replace('_', ' ').title())
-        
-        return concerns
-    
     @staticmethod
     def _generate_recommendations(metrics: Dict[str, float]) -> List[str]:
         recommendations = []

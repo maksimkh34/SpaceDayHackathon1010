@@ -1,16 +1,23 @@
 {
   "overall_score": 0.6906263146468341,
-  "concerns": [
-    "Moderate Acne",
-    "Pigmentation",
-    "Puffiness"
-  ],
   "recommendations": [
     "SPF защита ежедневно",
     "Средства с витамином C и ниацинамидом",
     "Лимфодренажный массаж",
     "Контроль потребления соли",
     "Мягкие эксфолианты для выравнивания текстуры"
+  ],
+  "features": [
+    [
+      "fatigue_high",
+      "stress_low",
+      "color_good"
+    ],
+    [
+      "skin_poor",
+      "puffiness_high",
+      "dryness_high"
+    ]
   ],
   "metrics_summary": {
     "paleness": 0.14233709375142053,

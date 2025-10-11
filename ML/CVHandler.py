@@ -7,10 +7,11 @@ from BatchAnalyzer import SkinHealthReport
 warnings.filterwarnings('ignore')
 
 mp_face = mp.solutions.face_mesh
+
 def main():
     import sys
     import json
-    
+
     if len(sys.argv) < 2:
         print("Использование: python CVHandler_Optimized.py <путь_к_изображению> [--visualize] [--report]")
         sys.exit(1)
@@ -38,15 +39,19 @@ def main():
             print(f"\n=== ОБЩАЯ ОЦЕНКА ===")
             print(f"Оценка состояния кожи: {report['overall_score']:.2%}")
             
-            if report['concerns']:
-                print(f"\n=== ВЫЯВЛЕННЫЕ ПРОБЛЕМЫ ===")
-                for concern in report['concerns']:
-                    print(f"  - {concern}")
-            
             print(f"\n=== РЕКОМЕНДАЦИИ ===")
             for rec in report['recommendations']:
                 print(f"  - {rec}")
             
+            if report['features']:
+                print("\n=== ХОРОШИЕ ХАРАКТЕРИСТИКИ ===")
+                for g in report['features'][0]:
+                    print(" -", g)
+                    
+                print("\n=== ПРОБЛЕМНЫЕ ЗОНЫ ===")
+                for b in report['features'][1]:
+                    print(" -", b)
+    
             with open('skin_analysis_report.json', 'w', encoding='utf-8') as f:
                 json.dump(report, f, ensure_ascii=False, indent=2)
             print("\nПолный отчет сохранен в skin_analysis_report.json")
@@ -59,7 +64,6 @@ def main():
     except Exception as e:
         print(f"Ошибка при анализе: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

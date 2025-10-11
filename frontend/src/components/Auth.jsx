@@ -84,7 +84,7 @@ export default function Auth({ onLogin }) {
                 </h2>
                 <form onSubmit={submit} className="form">
                     <label>
-                        Логин
+                        <div style={{margin: '0 0 10px 10px'}}>Логин</div>
                         <input
                             value={username}
                             onChange={handleUsernameChange}
@@ -107,7 +107,7 @@ export default function Auth({ onLogin }) {
                     </label>
 
                     <label>
-                        Пароль
+                        <div style={{margin: '0 0 10px 10px'}}>Пароль</div>
                         <input
                             type="password"
                             value={password}
@@ -132,7 +132,7 @@ export default function Auth({ onLogin }) {
 
                     <label className="row" style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                         <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)}/>
-                        запомнить меня
+                        Запомнить меня
                     </label>
 
                     <div className="row space-between" style={{marginTop: '20px'}}>
