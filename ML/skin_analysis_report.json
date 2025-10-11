@@ -1,6 +1,7 @@
 {
-  "overall_score": 0.7086200353994513,
+  "overall_score": 0.6906263146468341,
   "concerns": [
+    "Moderate Acne",
     "Pigmentation",
     "Puffiness"
   ],
@@ -12,21 +13,21 @@
     "Мягкие эксфолианты для выравнивания текстуры"
   ],
   "metrics_summary": {
-    "paleness": 0.10765065296082091,
+    "paleness": 0.14233709375142053,
     "cyanosis": 0.0,
-    "jaundice": 0.21876436421378126,
-    "redness": 0.471940279006958,
+    "jaundice": 0.06334847552594028,
+    "redness": 0.45212453603744507,
     "acne_spots": 0.0,
-    "oiliness": 5.5515306958011e-05,
-    "pigmentation": 0.7521090419322534,
-    "vascularity": 0.1863463803557236,
-    "puffiness": 0.7971431502595492,
-    "dark_circles": 0.425680482153799,
-    "wrinkles": 0.06698977977455683,
-    "texture_roughness": 0.7139261152312264,
-    "pore_size": 0.2866070247218914,
-    "mild_acne": 0.6000742054603005,
-    "moderate_acne": 0.26110699372584506,
-    "severe_acne": 0.07753637871802202
+    "oiliness": 0.0034968295412159643,
+    "pigmentation": 1.0,
+    "vascularity": 0.16353506154419992,
+    "puffiness": 0.7108387352365252,
+    "dark_circles": 0.4303034763710172,
+    "wrinkles": 0.10550644111054809,
+    "texture_roughness": 0.7634355861611107,
+    "pore_size": 0.4151436031331593,
+    "mild_acne": 0.8299142111152554,
+    "moderate_acne": 0.40504942185751586,
+    "severe_acne": 0.1188922044013428
   }
 }
