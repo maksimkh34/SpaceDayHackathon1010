@@ -71,61 +71,55 @@ class SkinHealthReport:
         oil_balance = oiliness
 
         # === РЕЗУЛЬТАТЫ ===
-        good_features = []
-        bad_features = []
+        good_keys = []
+        bad_keys = []
 
         # Эмоциональное состояние
-        if fatigue < 0.4:
-            good_features.append("Лицо выглядит отдохнувшим")
-        else:
-            bad_features.append("Признаки усталости")
+        good_keys.append("fatigue_low" if fatigue < 0.4 else "fatigue_high")
+        good_keys.append("stress_low" if stress < 0.4 else "stress_high")
 
-        if stress < 0.4:
-            good_features.append("Эмоциональное состояние стабильное")
-        else:
-            bad_features.append("Возможны признаки стресса")
-
-        # Состояние кожи
+        # Кожа
         if skin_health > 0.7:
-            good_features.append("Кожа выглядит здоровой и чистой")
+            good_keys.append("skin_good")
         elif skin_health < 0.4:
-            bad_features.append("Выраженные воспаления или шероховатость кожи")
+            bad_keys.append("skin_poor")
         else:
-            bad_features.append("Незначительные проблемы с кожей")
+            bad_keys.append("skin_moderate")
 
         # Цвет лица
         if color_balance > 0.7:
-            good_features.append("Цвет лица здоровый")
+            good_keys.append("color_good")
         elif color_balance < 0.4:
-            bad_features.append("Бледность или синюшность кожи")
+            bad_keys.append("color_bad")
 
         # Область глаз
         if eye_condition > 0.7:
-            good_features.append("Глаза выглядят отдохнувшими")
+            good_keys.append("eyes_good")
         elif eye_condition < 0.4:
-            bad_features.append("Темные круги или покраснение глаз")
+            bad_keys.append("eyes_bad")
 
-        # Признаки старения
+        # Старение
         if aging_signs < 0.4:
-            good_features.append("Кожа выглядит молодой")
+            good_keys.append("aging_low")
         elif aging_signs > 0.7:
-            bad_features.append("Выраженные возрастные изменения")
+            bad_keys.append("aging_high")
 
         # Отёки
         if puffiness_level > 0.6:
-            bad_features.append("Наблюдаются отеки")
+            bad_keys.append("puffiness_high")
         elif puffiness_level < 0.3:
-            good_features.append("Без признаков отеков")
+            good_keys.append("puffiness_low")
 
-        # Баланс жирности кожи
+        # Баланс жирности
         if oil_balance > 0.6:
-            bad_features.append("Повышенная жирность кожи")
+            bad_keys.append("oiliness_high")
         elif oil_balance < 0.3 and texture_roughness > 0.5:
-            bad_features.append("Кожа может быть пересушена")
+            bad_keys.append("dryness_high")
         else:
-            good_features.append("Баланс увлажненности в норме")
+            good_keys.append("hydration_ok")
 
-        return good_features, bad_features       
+
+        return good_keys, bad_keys      
         
     @staticmethod
     def _generate_recommendations(metrics: Dict[str, float]) -> List[str]:

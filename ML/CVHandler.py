@@ -7,10 +7,11 @@ from BatchAnalyzer import SkinHealthReport
 warnings.filterwarnings('ignore')
 
 mp_face = mp.solutions.face_mesh
+
 def main():
     import sys
     import json
-    
+
     if len(sys.argv) < 2:
         print("Использование: python CVHandler_Optimized.py <путь_к_изображению> [--visualize] [--report]")
         sys.exit(1)
@@ -63,7 +64,6 @@ def main():
     except Exception as e:
         print(f"Ошибка при анализе: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
